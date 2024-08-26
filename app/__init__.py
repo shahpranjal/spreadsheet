@@ -20,9 +20,11 @@ def create_app():
 
     from .routes.main_routes import main
     from .routes.api_routes import api
+    from .routes.bank_csv_routes import bank_csv_bp
 
     app.register_blueprint(main)
     app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(bank_csv_bp)
 
     return app
 

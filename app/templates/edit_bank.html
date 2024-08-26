@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Bank</title>
+</head>
+<body>
+    <h1>Edit {{ bank.bank_name }}</h1>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.bank_name.label }}<br>
+            {{ form.bank_name(size=32) }}<br>
+            {{ form.description_column.label }}<br>
+            {{ form.description_column() }}<br>
+            {{ form.date_column.label }}<br>
+            {{ form.date_column() }}<br>
+            {{ form.debit_column.label }}<br>
+            {{ form.debit_column() }}<br>
+            {{ form.credit_column.label }}<br>
+            {{ form.credit_column() }}<br>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+</body>
+</html>
