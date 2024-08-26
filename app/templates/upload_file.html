@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Banks{% endblock %}
+
+{% block content %}
+    <h1>Process File</h1>
+
+    <form id="fileForm">
+        <label for="bank">Select Bank:</label>
+        <select id="bank" name="bank">
+            {% for bank in banks %}
+                <option value={{ bank.id }}>{{ bank.bank_name }} </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label for="user">Select Name:</label>
+        <select id="user" name="user">
+            <option value="Pranjal">Pranjal</option>
+            <option value="Medha">Medha</option>
+        </select>
+
+        <br><br>
+
+        <input type="file" id="fileInput" style="display:none;" onchange="readFileAndSend(this)">
+        <button type="button" onclick="document.getElementById('fileInput').click();">Choose File</button>
+    </form>
+
+    <script>
+        function readFileAndSend(input) {
+            const file = input.files[0];
+            const bank = document.getElementById('bank').value;
+            const user = document.getElementById('user').value;
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+
+                    // Send the content and additional inputs to the server
+                    fetch('/process-file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content: content,
+                            bank: bank,
+                            user: user
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        alert('Data sent to server successfully!');
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('Failed to send data to server.');
+                    });
+                };
+                reader.readAsText(file);
+            } else {
+                console.log("No file")
+            }
+        }
+    </script>
+{% endblock %}

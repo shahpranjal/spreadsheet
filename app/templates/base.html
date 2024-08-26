@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My App{% endblock %}</title>
+    <style>
+        /* Style the navigation bar */
+        nav {
+            margin-bottom: 20px;
+        }
+
+        /* Style the buttons/links in the navigation bar */
+        nav ul {
+            list-style-type: none; /* Remove bullets */
+            padding: 0;
+            margin: 0;
+            display: flex; /* Arrange items horizontally */
+        }
+
+        nav ul li {
+            margin-right: 15px; /* Space between buttons */
+        }
+
+        nav ul li a {
+            text-decoration: none; /* Remove underline */
+            background-color: #007BFF; /* Button color */
+            color: white; /* Text color */
+            padding: 10px 15px; /* Padding inside the button */
+            border-radius: 5px; /* Rounded corners */
+        }
+
+        nav ul li a:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li><a href="{{ url_for('process_file.index') }}">Process File</a></li>
+            <li><a href="{{ url_for('bank_csv_bp.manage_banks') }}">Manage Banks</a></li>
+        </ul>
+    </nav>
+
+    <div>
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

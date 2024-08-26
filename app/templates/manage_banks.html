@@ -1,44 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Manage Banks</title>
-</head>
-<body>
-    <h1>Manage Banks</h1>
+{% extends "base.html" %}
 
-    <h2>Add or Edit Bank CSV Format</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.bank_name.label }}<br>
-            {{ form.bank_name(size=32) }}<br>
-            {{ form.description_column.label }}<br>
-            {{ form.description_column() }}<br>
-            {{ form.date_column.label }}<br>
-            {{ form.date_column() }}<br>
-            {{ form.debit_column.label }}<br>
-            {{ form.debit_column() }}<br>
-            {{ form.credit_column.label }}<br>
-            {{ form.credit_column() }}<br>
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+{% block title %}Manage Banks{% endblock %}
 
-    <button onclick="window.location.href='{{ url_for('main.index') }}'">Go to Home</button>
+{% block content %}
+<h1>Manage Banks</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.bank_name.label }}<br>
+        {{ form.bank_name(size=32) }}<br>
+        {{ form.description_column.label }}<br>
+        {{ form.description_column() }}<br>
+        {{ form.date_column.label }}<br>
+        {{ form.date_column() }}<br>
+        {{ form.debit_column.label }}<br>
+        {{ form.debit_column() }}<br>
+        {{ form.credit_column.label }}<br>
+        {{ form.credit_column() }}<br>
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
 
-    <h2>Existing Banks</h2>
-    <ul>
-        {% for bank in banks %}
-            <li>
-                <strong>{{ bank.bank_name }}</strong><br>
-                Date Column: {{ bank.date_column }}<br>
-                Description Column: {{ bank.description_column }}<br>
-                Debit Column: {{ bank.debit_column }}<br>
-                Credit Column: {{ bank.credit_column }}<br>
-                <a href="{{ url_for('bank_csv_bp.edit_bank', bank_id=bank.id) }}">Edit</a>
-            </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+<button onclick="window.location.href='{{ url_for('main.index') }}'">Go to Home</button>
+
+<h2>Existing Banks</h2>
+<ul>
+    {% for bank in banks %}
+    <li>
+        <strong>{{ bank.bank_name }}</strong><br>
+        Date Column: {{ bank.date_column }}<br>
+        Description Column: {{ bank.description_column }}<br>
+        Debit Column: {{ bank.debit_column }}<br>
+        Credit Column: {{ bank.credit_column }}<br>
+        <a href="{{ url_for('bank_csv_bp.edit_bank', bank_id=bank.id) }}">Edit</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

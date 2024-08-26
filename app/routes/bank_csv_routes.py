@@ -6,9 +6,8 @@ from app.forms import BankCsvForm
 bank_csv_bp = Blueprint('bank_csv_bp', __name__)
 
 
-@bank_csv_bp.route('/banks', methods=['GET', 'POST'])
+@bank_csv_bp.route('/', methods=['GET', 'POST'])
 def manage_banks():
-
     form = BankCsvForm()
     if form.validate_on_submit():
         bank = BankCsv.query.filter_by(bank_name=form.bank_name.data).first()
