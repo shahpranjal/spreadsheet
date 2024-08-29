@@ -4,36 +4,184 @@
 
 {% block content %}
 <h1>Manage Banks</h1>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.bank_name.label }}<br>
-        {{ form.bank_name(size=32) }}<br>
-        {{ form.description_column.label }}<br>
-        {{ form.description_column() }}<br>
-        {{ form.date_column.label }}<br>
-        {{ form.date_column() }}<br>
-        {{ form.debit_column.label }}<br>
-        {{ form.debit_column() }}<br>
-        {{ form.credit_column.label }}<br>
-        {{ form.credit_column() }}<br>
-    </p>
-    <p>{{ form.submit() }}</p>
-</form>
 
-<button onclick="window.location.href='{{ url_for('main.index') }}'">Go to Home</button>
+<!-- Button to open the modal for adding a new bank -->
+<button id="addBankBtn">Add Bank</button>
 
+<!-- List of existing banks -->
 <h2>Existing Banks</h2>
-<ul>
+<ul class="bank-list">
     {% for bank in banks %}
-    <li>
-        <strong>{{ bank.bank_name }}</strong><br>
-        Date Column: {{ bank.date_column }}<br>
-        Description Column: {{ bank.description_column }}<br>
-        Debit Column: {{ bank.debit_column }}<br>
-        Credit Column: {{ bank.credit_column }}<br>
-        <a href="{{ url_for('bank_csv_bp.edit_bank', bank_id=bank.id) }}">Edit</a>
-    </li>
+    <li data-bank-id="{{ bank.id }}">{{ bank.bank_name }}</li>
     {% endfor %}
 </ul>
+
+<!-- Modal for adding/editing a bank -->
+<div id="bankModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <form id="bankForm" method="POST">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                <label for="bank_name">Bank Name</label>
+                {{ form.bank_name(id='bank_name') }}
+            </div>
+            <div class="form-group">
+                <label for="date_column">Date Column</label>
+                {{ form.date_column(id='date_column') }}
+            </div>
+            <div class="form-group">
+                <label for="description_column">Description Column</label>
+                {{ form.description_column(id='description_column') }}
+            </div>
+            <div class="form-group">
+                <label for="debit_column">Debit Column</label>
+                {{ form.debit_column(id='debit_column') }}
+            </div>
+            <div class="form-group">
+                <label for="credit_column">Credit Column</label>
+                {{ form.credit_column(id='credit_column') }}
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancelBtn">Cancel</button>
+                <button type="submit" id="saveBtn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .bank-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .bank-list li {
+        padding: 10px;
+        margin: 5px 0;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .bank-list li:hover {
+        background-color: #e9ecef;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .form-actions {
+        text-align: right;
+    }
+
+    .form-actions button {
+        margin-left: 10px;
+    }
+
+    /* Hide the number input spinner buttons */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var modal = $('#bankModal');
+        var form = $('#bankForm');
+        var bankIdInput = $('<input>').attr({
+            type: 'hidden',
+            id: 'bank_id',
+            name: 'bank_id'
+        });
+
+        form.append(bankIdInput);
+
+        $('#addBankBtn').on('click', function () {
+            // Clear form fields and show the modal for adding a new bank
+            form.trigger('reset');
+            bankIdInput.val('');
+            modal.show();
+        });
+
+        $('.bank-list li').on('click', function () {
+            var bankId = $(this).data('bank-id');
+
+            // Fetch the bank details using the new API endpoint and populate the form fields
+            $.getJSON(`/banks/bank/${bankId}`, function (data) {
+                $('#bank_name').val(data.bank_name);
+                $('#date_column').val(data.date_column);
+                $('#description_column').val(data.description_column);
+                $('#debit_column').val(data.debit_column);
+                $('#credit_column').val(data.credit_column);
+                bankIdInput.val(bankId);
+                modal.show();
+            });
+        });
+
+        $('.close, #cancelBtn').on('click', function () {
+            modal.hide();
+        });
+    });
+</script>
 {% endblock %}

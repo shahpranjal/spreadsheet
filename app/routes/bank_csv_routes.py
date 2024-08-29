@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
 from app import db
 from app.models.bank_csv import BankCsv
 from app.forms import BankCsvForm
@@ -51,3 +51,15 @@ def edit_bank(bank_id):
         return redirect(url_for('bank_csv_bp.manage_banks'))
 
     return render_template('edit_bank.html', form=form, bank=bank)
+
+
+@bank_csv_bp.route('/bank/<int:bank_id>', methods=['GET'])
+def get_bank_details(bank_id):
+    bank = BankCsv.query.get_or_404(bank_id)
+    return jsonify({
+        'bank_name': bank.bank_name,
+        'date_column': bank.date_column,
+        'debit_column': bank.debit_column,
+        'credit_column': bank.credit_column,
+        'description_column': bank.description_column
+    })

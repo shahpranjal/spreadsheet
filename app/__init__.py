@@ -32,7 +32,7 @@ def create_app():
 
 
 def add_initial_entries():
-    from app.models.transaction import User
+    from .models.user import User
 
     # Check if the database is empty before adding initial data
     if not User.query.first():
