@@ -1,65 +1,86 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
+from flask import Blueprint, jsonify, request
 from app import db
 from app.models.bank_csv import BankCsv
-from app.forms import BankCsvForm
 
-bank_csv_bp = Blueprint('bank_csv_bp', __name__)
+bank_api = Blueprint('bank', __name__)
 
 
-@bank_csv_bp.route('/', methods=['GET', 'POST'])
-def manage_banks():
-    form = BankCsvForm()
-    if form.validate_on_submit():
-        bank = BankCsv.query.filter_by(bank_name=form.bank_name.data).first()
-        if bank:
-            # Update existing bank
-            bank.date_column = form.date_column.data
-            bank.debit_column = form.debit_column.data
-            bank.credit_column = form.credit_column.data
-            bank.description_column = form.description_column.data
-            flash(f'Updated {form.bank_name.data}', 'success')
-        else:
-            # Create new bank
-            bank = BankCsv(
-                bank_name=form.bank_name.data,
-                date_column=form.date_column.data,
-                debit_column=form.debit_column.data,
-                credit_column=form.credit_column.data,
-                description_column=form.description_column.data
-            )
-            db.session.add(bank)
-            flash(f'Created {form.bank_name.data}', 'success')
-        db.session.commit()
-        return redirect(url_for('bank_csv_bp.manage_banks'))
+# Create a new bank
+@bank_api.route('/create_bank', methods=['POST'])
+def create_bank():
+    data = request.get_json()
+    new_bank = BankCsv(
+        name=data['name'],
+        date_column=data['date_column'],
+        description_column=data.get('description_column'),
+        credit_column=data['credit_column'],
+        debit_column=data['debit_column']
+    )
+    db.session.add(new_bank)
+    db.session.commit()
+    return jsonify({
+        'id': new_bank.id,
+        'name': new_bank.name,
+        'date_column': new_bank.date_column,
+        'description_column': new_bank.description_column,
+        'credit_column': new_bank.credit_column,
+        'debit_column': new_bank.debit_column
+    }), 201
 
+
+# Get all banks
+@bank_api.route('/', methods=['GET'])
+def get_banks():
     banks = BankCsv.query.all()
-    return render_template('manage_banks.html', form=form, banks=banks)
+    return jsonify([{
+        'id': bank.id,
+        'name': bank.name,
+        'date_column': bank.date_column,
+        'description_column': bank.description_column,
+        'credit_column': bank.credit_column,
+        'debit_column': bank.debit_column
+    } for bank in banks])
 
 
-@bank_csv_bp.route('/edit-bank/<int:bank_id>', methods=['GET', 'POST'])
-def edit_bank(bank_id):
-    bank = BankCsv.query.get_or_404(bank_id)
-    form = BankCsvForm(obj=bank)
-    if form.validate_on_submit():
-        bank.bank_name = form.bank_name.data
-        bank.date_column = form.date_column.data
-        bank.debit_column = form.debit_column.data
-        bank.credit_column = form.credit_column.data
-        bank.description_column = form.description_column.data
-        db.session.commit()
-        flash(f'Updated {bank.bank_name}', 'success')
-        return redirect(url_for('bank_csv_bp.manage_banks'))
-
-    return render_template('edit_bank.html', form=form, bank=bank)
-
-
-@bank_csv_bp.route('/bank/<int:bank_id>', methods=['GET'])
-def get_bank_details(bank_id):
+# Get a specific bank by ID
+@bank_api.route('/<int:bank_id>', methods=['GET'])
+def get_bank(bank_id):
     bank = BankCsv.query.get_or_404(bank_id)
     return jsonify({
-        'bank_name': bank.bank_name,
+        'id': bank.id,
+        'name': bank.name,
         'date_column': bank.date_column,
-        'debit_column': bank.debit_column,
+        'description_column': bank.description_column,
         'credit_column': bank.credit_column,
-        'description_column': bank.description_column
+        'debit_column': bank.debit_column
     })
+
+
+# Update a bank
+@bank_api.route('/<int:bank_id>', methods=['PUT'])
+def update_bank(bank_id):
+    bank = BankCsv.query.get_or_404(bank_id)
+    data = request.get_json()
+    bank.name = data['name']
+    bank.date_column = data['date_column']
+    bank.description_column = data.get('description_column')
+    bank.credit_column = data['credit_column']
+    bank.debit_column = data['debit_column']
+    db.session.commit()
+    return jsonify({
+        'id': bank.id,
+        'name': bank.name,
+        'date_column': bank.date_column,
+        'description_column': bank.description_column,
+        'credit_column': bank.credit_column,
+        'debit_column': bank.debit_column
+    })
+
+
+# Delete a bank
+@bank_api.route('/<int:bank_id>', methods=['DELETE'])
+def delete_bank(bank_id):
+    bank = BankCsv.query.get_or_404(bank_id)
+    db.session.delete(bank)
+    db.session.commit()
+    return '', 204
