@@ -57,7 +57,7 @@ def get_bank(bank_id):
 
 
 # Update a bank
-@bank_api.route('/<int:bank_id>', methods=['PUT'])
+@bank_api.route('/<int:bank_id>', methods=['POST'])
 def update_bank(bank_id):
     bank = BankCsv.query.get_or_404(bank_id)
     data = request.get_json()
