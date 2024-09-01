@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil import parser as date_parser
 from sqlalchemy import Enum
 
 from app import db
@@ -23,7 +24,7 @@ class Transaction(Base, db.Model):
         if not debit and not credit:
             raise ValueError("Either debit or credit must be provided.")
 
-        self.date = date
+        self.set_date(date)
         self.description = description
         self.debit = debit
         self.credit = credit
@@ -31,3 +32,6 @@ class Transaction(Base, db.Model):
         self.bank_id = bank_id
         self.category_id = category_id
         super().__init__(**kwargs)
+
+    def set_date(self, date):
+        self.date = date_parser.parse(date) if isinstance(date, str) else date
