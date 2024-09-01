@@ -1,13 +1,14 @@
 from app.models import File, Transaction, db
+from dateutil import parser as date_parser
 
 
 class FileProcessor:
-    def __init__(self, file, user, bank_csv, start_date, end_date):
+    def __init__(self, file, user, bank_csv):
         self.file = file
         self.user = user
         self.bank_csv = bank_csv
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date = None
+        self.end_date = None
         self.transactions = []
 
     def parse_line(self, line):
@@ -17,8 +18,13 @@ class FileProcessor:
             debit_index = self.bank_csv.debit_column - 1
             credit_index = self.bank_csv.credit_column - 1
             description_index = self.bank_csv.description_column - 1
+            date = date_parser.parse(columns[date_index])
+            if self.start_date is None or self.start_date > date:
+                self.start_date = date
+            if self.end_date is None or self.end_date < date:
+                self.end_date = date
             transaction = Transaction(
-                date=columns[date_index],
+                date=date,
                 debit=float(columns[debit_index]) if columns[debit_index] else 0.0,
                 credit=float(columns[credit_index]) if columns[credit_index] else 0.0,
                 description=columns[description_index],

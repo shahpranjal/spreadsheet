@@ -1,11 +1,11 @@
 from datetime import datetime
-from dateutil import parser as date_parser
 from sqlalchemy import Enum
 
 from app import db
+from app.models.base import Base
 
 
-class Transaction(db.Model):
+class Transaction(Base, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     description = db.Column(db.String(100), nullable=False)
@@ -23,7 +23,7 @@ class Transaction(db.Model):
         if not debit and not credit:
             raise ValueError("Either debit or credit must be provided.")
 
-        self.date = date_parser.parse(date) if isinstance(date, str) else date
+        self.date = date
         self.description = description
         self.debit = debit
         self.credit = credit

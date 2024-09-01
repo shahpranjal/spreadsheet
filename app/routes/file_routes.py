@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from app.models import File, User, BankCsv
-from datetime import datetime
 
 from app.services import FileProcessor
 
@@ -21,19 +20,13 @@ def upload_file():
 
     user_id = request.form['user_id']
     bank_id = request.form['bank_id']
-    start_date_str = request.form['start_date']
-    end_date_str = request.form['end_date']
 
     # Validate the input using the shared function
-    validation_error, validated_data = validate_file_input(user_id, bank_id, start_date_str, end_date_str,
-                                                           file.filename)
+    validation_error, validated_data = validate_file_input(user_id, bank_id, file.filename)
     if validation_error:
         return jsonify(validation_error), 400
 
-    file_processor = FileProcessor(file, validated_data['user'],
-                                   validated_data['bank'],
-                                   validated_data['start_date'],
-                                   validated_data['end_date'])
+    file_processor = FileProcessor(file, validated_data['user'], validated_data['bank'])
     result = file_processor.process()
 
     if "error" in result:
@@ -41,17 +34,7 @@ def upload_file():
     return jsonify(result), 201
 
 
-def validate_file_input(user_id, bank_id, start_date_str, end_date_str, filename):
-    # Validate start date and end date
-    try:
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-    except ValueError:
-        return {"error": "Invalid date format, should be YYYY-MM-DD"}, None
-
-    if start_date >= end_date:
-        return {"error": "Start date must be less than end date"}, None
-
+def validate_file_input(user_id, bank_id, filename):
     # Validate user_id
     user = User.query.get(user_id)
     if not user:
@@ -66,8 +49,6 @@ def validate_file_input(user_id, bank_id, start_date_str, end_date_str, filename
     existing_file = File.query.filter_by(
         user_id=user_id,
         bank_id=bank_id,
-        start_date=start_date,
-        end_date=end_date,
         filename=filename
     ).first()
 
@@ -75,4 +56,4 @@ def validate_file_input(user_id, bank_id, start_date_str, end_date_str, filename
         return {"error": "File with the same user, bank, date range, and filename has already been uploaded"}, None
 
     # If all validations pass
-    return None, {"start_date": start_date, "end_date": end_date, "user": user, "bank": bank}
+    return None, {"user": user, "bank": bank}
