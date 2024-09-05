@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import desc
+
 from app import db
 from app.models import Transaction
 
@@ -8,7 +10,7 @@ transaction_api = Blueprint('transaction_api', __name__)
 # Get all transactions
 @transaction_api.route('/', methods=['GET'])
 def get_transactions():
-    transactions = Transaction.query.all()
+    transactions = Transaction.query.order_by(desc(Transaction.date), Transaction.description).all()
     transactions_data = [
         get_transaction_json(t) for t in transactions
     ]
